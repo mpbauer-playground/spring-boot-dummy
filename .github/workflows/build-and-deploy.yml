@@ -1,4 +1,4 @@
-name: openshift-playground
+name: openshift-playground-github-runner
 
 env:
   # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
