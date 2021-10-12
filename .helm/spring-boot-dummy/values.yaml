@@ -1,0 +1,5 @@
+
+githubPullSecretName: 'github-pull-secret'
+githubPat: ''
+githubPatIssuer: ''
+appName: 'spring-boot-dummy'

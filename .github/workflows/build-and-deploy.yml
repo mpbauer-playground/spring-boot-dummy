@@ -152,5 +152,7 @@ jobs:
           namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
       # https://github.com/redhat-actions/oc-login#readme
-      - name: 'Show projects'
-        run: oc projects
+      - name: 'Build Image'
+        run: oc start-build spring-boot-dummy
+      - name: 'Tag images'
+        run: oc tag spring-boot-dummy:latest spring-boot-dummy:v1
