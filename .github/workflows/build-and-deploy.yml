@@ -35,11 +35,107 @@ jobs:
         run: java -version
       - name: Check Maven Version
         run: mvn -version
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          repositories: >
+            [
+              {
+                "id": "some-repository",
+                "name": "some-repository-name",
+                "url": "http://some.repository.url",
+                "releases": {
+                  "enabled": "true",
+                  "updatePolicy": "always",
+                  "checksumPolicy": "fail"
+                },
+                "snapshots": {
+                  "enabled": "false",
+                  "updatePolicy": "always",
+                  "checksumPolicy": "fail"
+                }
+              }
+            ]
+          plugin_repositories: >
+            [
+              {
+                "id": "some-plugin-repository",
+                "name": "some-plugin-repository-name",
+                "url": "http://some.plugin.repository.url",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "false"
+                }
+              }
+            ]
+          servers: >
+            [
+              {
+                "id": "some-id",
+                "username": "${env.USER}",
+                "password": "${env.PASS}",
+                "configuration": {
+                  "httpConfiguration": {
+                    "all": {
+                      "usePreemptive": "true"
+                    }
+                  }
+                }
+              }
+            ]
+          mirrors: >
+            [
+              {
+                "id": "nexus",
+                "mirrorOf": "!my-org-snapshots,*",
+                "url": "http://redacted/nexus/content/groups/public"
+              }
+            ]
+          profiles: >
+            [
+              {
+                "id": "foo.profile",
+                "name": "foo.profile",
+                "url": "http://foo.bar.profile",
+                "properties": {
+                  "foo": "property-1",
+                  "bar": "property-2"
+                }
+              }
+            ]
+          plugin_groups: >
+            [
+              "some.plugin.group.id",
+              "some.other.plugin.group.id"
+            ]
+          proxies: >
+            [
+              {
+                "id": "foo-proxy",
+                "active": "true",
+                "protocol": "http",
+                "host": "https://proxy.example.com",
+                "port": "443",
+                "username": "foo",
+                "password": "bar",
+                "nonProxyHosts": "noproxy1.example.com|noproxy2.example.com"
+              }
+            ]
+          active_profiles: >
+            [
+              "some-profile"
+            ]
+          output_file: .m2/settings.xml
 
       - name: 'Determine image tags'
         if: env.IMAGE_TAGS == ''
         run: |
           echo "IMAGE_TAGS=latest ${GITHUB_SHA::12}" | tee -a $GITHUB_ENV
+
+      - name: 'Build'
+        run: mvn -X clean package
 
       - name: 'Install oc'
         uses: redhat-actions/openshift-tools-installer@v1
@@ -55,3 +151,6 @@ jobs:
           insecure_skip_tls_verify: true
           namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
+      # https://github.com/redhat-actions/oc-login#readme
+      - name: 'Show projects'
+        run: oc projects
