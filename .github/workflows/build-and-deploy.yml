@@ -21,33 +21,31 @@ jobs:
     name: Build and deploy to OpenShift
     runs-on: [self-hosted, linux, x64]
     steps:
-    - name: Check out repository
+    - name: 'Check out repository'
       uses: actions/checkout@v2
 
-    - name: Build with Maven
-      uses: actions/setup-java@v2
+    - name: 'Setup Java'
+    - uses: actions/setup-java@v2
       with:
         distribution: 'temurin'
         java-version: '11'
         cache: 'maven'
-      run: mvn -B package --file pom.xml
 
-    # Build and test the application
-    - name: 'Build & Test'
-      run: mvn clean package
+    - name: 'Build with Maven'
+      run: mvn -B package --file pom.xml
         
-    - name: Determine image tags
+    - name: 'Determine image tags'
       if: env.IMAGE_TAGS == ''
       run: |
         echo "IMAGE_TAGS=latest ${GITHUB_SHA::12}" | tee -a $GITHUB_ENV
 
-    - name: Install oc
+    - name: 'Install oc'
       uses: redhat-actions/openshift-tools-installer@v1
       with:
         oc: 4
 
     # https://github.com/redhat-actions/oc-login#readme
-    - name: Log in to OpenShift
+    - name: 'Log in to OpenShift'
       uses: redhat-actions/oc-login@v1
       with:
         openshift_server_url: ${{ env.OPENSHIFT_SERVER }}
