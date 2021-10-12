@@ -1,4 +1,4 @@
-name: openshift-playground-github-runner
+name: openshift-playground-self-hosted-runner
 
 env:
   # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
@@ -27,7 +27,9 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Build with Maven
+      - name: Check Java Version
+        run: java -version
+      - name: Check Maven Version
         run: mvn -version
 
       - name: 'Determine image tags'
