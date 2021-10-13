@@ -1,5 +1,37 @@
+appName: 'spring-boot-dummy'
+replicas: 1
 
 githubPullSecretName: 'github-pull-secret'
 githubPat: ''
 githubPatIssuer: ''
-appName: 'spring-boot-dummy'
+
+applicationImage: image-registry.openshift-image-registry.svc:5000/dev/spring-boot-dummy
+applicationImageTag: latest
+
+filebeatImage: image-registry.openshift-image-registry.svc:5000/dev/filebeat
+fileBeatImageTag: 7.12.0
+
+keystoreSecretName: 'spring-boot-dummy-keystore'
+keystoreSecretKeystoreFileKey: 'keystore-file.jks'
+keystoreSecretKeystorePasswordKey: 'password'
+
+resources:
+  application:
+    memoryRequest: "512Mi"
+    memoryLimit: "1Gi"
+    cpuRequest: "250m"
+    cpuLimit: "1000m"
+  filebeat:
+    memoryRequest: "70Mi"
+    memoryLimit: "100Mi"
+    cpuRequest: "20m"
+    cpuLimit: "50m"
+
+# Manages the exposure of the application (internal for DEV, external for ACC + PROD)
+routeExposure: internal
+# routeExposure: external
+
+# Manages the domain name under which the app is reachable
+routeDomainName: apps-crc.testing
+# routeDomainName: axa-ch-prod-hpl-int.blue.medc.openpaas.axa-cloud.com
+# routeDomainName: axa-ch-preprod-hpl-int.blue.medc.openpaas.axa-cloud.com

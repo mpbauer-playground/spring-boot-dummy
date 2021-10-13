@@ -1,0 +1,176 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    app: {{ .Values.appName }}
+    # https://helm.sh/docs/chart_best_practices/labels/
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Values.appName }}
+    app.kubernetes.io/version: {{ .Chart.Version | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  revisionHistoryLimit: 12
+  selector:
+    deploymentConfig: {{ .Values.appName }}
+  replicas: {{ .Values.replicas }}
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        deploymentConfig: {{ .Values.appName }}
+      name: {{ .Values.appName }}
+    spec:
+      # affinity:
+      #   podAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       - labelSelector:
+      #           matchExpressions:
+      #             - key: app
+      #               operator: In
+      #               values:
+      #                 - {{ .Values.appName }}
+      #         topologyKey: kubernetes.io/hostname
+      containers:
+        - name: {{ .Values.appName }}
+
+          {{- $taggedApplicationImage := printf "%s:%s" .Values.applicationImage .Values.applicationImageTag }}
+          image: {{ $taggedApplicationImage }}
+
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8778
+              name: jolokia
+              protocol: TCP
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            - containerPort: 8443
+              name: https
+              protocol: TCP
+          # livenessProbe:
+          #   failureThreshold: 3
+          #   httpGet:
+          #     path: /actuator/info
+          #     port: 8081
+          #     scheme: HTTP
+          #   initialDelaySeconds: 90
+          #   periodSeconds: 10
+          #   successThreshold: 1
+          #   timeoutSeconds: 5
+          # readinessProbe:
+          #   failureThreshold: 3
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: 8081
+          #     scheme: HTTP
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 10
+          #   successThreshold: 1
+          #   timeoutSeconds: 10
+          resources:
+            requests:
+              memory: {{ .Values.resources.application.memoryRequest }}
+              cpu: {{ .Values.resources.application.cpuRequest }}
+            limits:
+              memory: {{ .Values.resources.application.memoryLimit }}
+              cpu: {{ .Values.resources.application.cpuLimit }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          env:
+            - name: TZ
+              value: Europe/Zurich
+            # - name: KEYSTORE_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: {{ .Values.keystoreSecretName }}
+            #       key: {{ .Values.keystoreSecretKeystorePasswordKey }}
+            # - name: KEYSTORE_FILE
+            #   valueFrom:
+            #     - secretKeyRef:
+            #         name: {{ .Values.keystoreSecretName}}
+            #         key: {{ .Values.keystoreSecretKeystoreFileKey}}
+          # envFrom:
+          #   - configMapRef:
+          #       name: common-env
+          # volumeMounts:
+          #   - mountPath: /opt/app/certs
+          #     name: certs
+          #     readOnly: true
+          #   - mountPath: /var/tmp/logs
+          #     name: logs
+        # - name: filebeat
+        #
+        #   {{- $taggedFileBeatImage := printf "%s:%s" .Values.applicationImage .Values.applicationImageTag }}
+        #   image: {{ $taggedFileBeatImage }}
+        #
+        #   imagePullPullPolicy: Always
+        #   resources:
+        #     requests:
+        #       memory: {{ .Values.resources.filebeat.memoryRequest }}
+        #       cpu: {{ .Values.resources.filebeat.cpuRequest }}
+        #     limits:
+        #       memory: {{ .Values.resources.filebeat.memoryLimit }}
+        #       cpu: {{ .Values.resources.filebeat.cpuLimit }}
+        #   env:
+        #     - name: ELASTIC_CLOUD_ID
+        #       valueFrom:
+        #         secretKeyRef:
+        #           key: cloud_id
+        #           name: elastic-cloud-id
+        #     - name: ELASTIC_CLOUD_AUTH
+        #       valueFrom:
+        #         secretKeyRef:
+        #           key: basic_auth
+        #           name: elastic-cloud-id
+        #     - name: NODE_NAME
+        #       valueFrom:
+        #         fieldRef:
+        #           apiVersion: v1
+        #           fieldPath: spec.nodename
+        #     - name: NAMESPACE
+        #       valueFrom:
+        #         fieldRef:
+        #           apiVersion: v1
+        #           fieldPath: metadata.namespace
+        #     - name: POD_NAME
+        #       valueFrom:
+        #         fieldRef:
+        #           apiVersion: v1
+        #           fieldPath: metadata.name
+        #   terminationMessagePath: /dev/termination-log
+        #   terminationMessagePolicy: File
+        #   volumeMounts:
+        #     - mountPath: /var/tmp/logs
+        #       name: logs
+        #     - mountPath: /var
+        #       name: filebeat-config
+        #   args:
+        #     - '-c'
+        #     - /var/filebeat.yml
+        #     - '-e'
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 75
+      # volumes:
+      #   - name: certs
+      #     secret:
+      #       secretName: {{ .Values.keystoreSecretName }}
+      #   - name: logs
+      #   - name: filebeat-config
+      #     configMap:
+      #       defaultMode: 420
+      #       name: filebeat-log-shipper
+  test: false
+  triggers:

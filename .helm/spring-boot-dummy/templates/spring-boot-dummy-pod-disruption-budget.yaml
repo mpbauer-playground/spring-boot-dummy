@@ -1,12 +1,16 @@
-kind: ImageStream
-apiVersion: image.openshift.io/v1
+apiVersion: policy/v1
+kind: PodDisruptionBudget
 metadata:
   name: {{ .Values.appName }}
   labels:
-    build: {{ .Values.appName }}
     # https://helm.sh/docs/chart_best_practices/labels/
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/name: {{ .Values.appName }}
     app.kubernetes.io/version: {{ .Chart.Version | quote }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      deploymentConfig: {{ .Values.appName }}

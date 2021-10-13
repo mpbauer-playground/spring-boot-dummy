@@ -1,0 +1,52 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    router: {{ .Values.routeExposure }}
+    # https://helm.sh/docs/chart_best_practices/labels/
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Values.appName }}
+    app.kubernetes.io/version: {{ .Chart.Version | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  host: {{ .Values.appName }}.{{ .Values.routeDomainName }}
+  port:
+    targetPort: 80
+  to:
+    kind: Service
+    name: {{ .Values.appName }}
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  wildcardPolicy: None
+
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.appName }}-actuator
+  labels:
+    router: {{ .Values.routeExposure }}
+    # https://helm.sh/docs/chart_best_practices/labels/
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Values.appName }}
+    app.kubernetes.io/version: {{ .Chart.Version | quote }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  host: {{ .Values.appName }}-actuator.{{ .Values.routeDomainName }}
+  path: /actuator
+  port:
+    targetPort: actuator
+  to:
+    kind: Service
+    name: {{ .Values.appName }}
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  wildcardPolicy: None
