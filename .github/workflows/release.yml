@@ -47,6 +47,6 @@ jobs:
 
       - name: 'Tag semantic version'
         run: |
-          git tag -a ${{ steps.semantic-version.outputs.version_tag }}
+          git tag -a ${{ steps.semantic-version.outputs.version_tag }} -m ' '
           git push --tags
 
