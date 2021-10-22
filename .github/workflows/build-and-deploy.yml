@@ -14,7 +14,9 @@ env:
 
 on:
   push:
-    branches: [ main ]
+    branches-ignore:
+      - '**'
+    #branches: [ main ]
 
 jobs:
   openshift-ci-cd:

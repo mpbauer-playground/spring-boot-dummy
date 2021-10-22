@@ -1,0 +1,47 @@
+name: release-me
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  openshift-ci-cd:
+    name: Build and deploy to OpenShift
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: 'Get latest semver tag'
+        uses: paulhatch/semantic-version@v4.0.2
+        id: 'semantic-version'
+        with:
+          # The prefix to use to identify tags
+          tag_prefix: "v"
+          # A string which, if present in a git commit, indicates that a change represents a
+          # major (breaking) change, supports regular expressions wrapped with '/'
+          major_pattern: "(MAJOR)"
+          # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
+          minor_pattern: "(MINOR)"
+          # A string to determine the format of the version output
+          format: "${major}.${minor}.${patch}"
+          # Indicate whether short tags like 'v1' should be supported. If false only full
+          # tags like 'v1.0.0' will be recognized.
+          short_tags: true
+          # If this is set to true, *every* commit will be treated as a new version.
+          bump_each_commit: false
+
+      # https://github.com/redhat-actions/oc-login#readme
+      - name: 'Echo output from previous step'
+        run: |
+          echo ${{ steps.semantic-version.outputs.major }}
+          echo ${{ steps.semantic-version.outputs.minor }}
+          echo ${{ steps.semantic-version.outputs.patch }}
+          echo ${{ steps.semantic-version.outputs.increment }}
+          echo ${{ steps.semantic-version.outputs.version }}
+          echo ${{ steps.semantic-version.outputs.version_tag }}
+          echo ${{ steps.semantic-version.outputs.changed }}
+
