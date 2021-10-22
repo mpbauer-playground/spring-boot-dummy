@@ -1,3 +1,3 @@
 # Spring Boot Dummy
 
-Foo
+Foo Baz
