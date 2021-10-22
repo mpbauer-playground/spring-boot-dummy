@@ -6,6 +6,13 @@ on:
         description: 'Job to run.'
         required: true
         default: 'prod-deploy'
+      foo:
+        description: 'Foo'
+        required: false
+        default: 'foo'
+      bar:
+        description: 'Bar'
+        required: false
 jobs:
   dev-deploy:
     name: Deploy dev-deploy
