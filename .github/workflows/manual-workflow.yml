@@ -1,31 +1,28 @@
-name: Manually triggered workflow
+name: Manual Deployment
 on:
   workflow_dispatch:
     inputs:
-      job:
-        description: 'Job to run.'
+      stage:
+        description: 'Stage to deploy (preprod | prod):'
         required: true
-        default: 'prod-deploy'
-      foo:
-        description: 'Foo'
-        required: false
-        default: 'foo'
-      bar:
-        description: 'Bar'
-        required: false
+        default: 'preprod'
+      version:
+        description: 'Version (e.g. "1.0.1")'
+        required: true
+        default: 'x.x.x'
 jobs:
-  dev-deploy:
-    name: Deploy dev-deploy
+  preprod-deployment:
+    name: 'Deploy to PREPROD'
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.job == 'dev-deploy'}}
+    if: ${{ github.event.inputs.stage == 'preprod'}}
     steps:
-      - name: ${{ github.event.inputs.job }} - step 1
-        run: echo "${{ github.event.inputs.job }} triggered!"
+      - name: 'Deploy to PREPROD'
+        run: echo "Deploying app with version '${{ github.event.inputs.version }}' to '${{ github.event.inputs.stage }}' ..."
 
-  prod-deploy:
-    name: Deploy prod-deploy
+  prod-deployment:
+    name: 'Deploy to PROD'
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.job == 'prod-deploy'}}
+    if: ${{ github.event.inputs.stage == 'prod'}}
     steps:
-      - name: ${{ github.event.inputs.job }} - step 1
-        run: echo "${{ github.event.inputs.job }} triggered!"
+      - name: 'Deploy to PROD'
+        run: echo "Deploying app with version '${{ github.event.inputs.version }}' to '${{ github.event.inputs.stage }}' ..."
