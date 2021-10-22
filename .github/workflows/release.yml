@@ -55,6 +55,9 @@ jobs:
           git tag -a ${{ steps.semantic-version.outputs.version_tag }} -m '${{ github.event.head_commit.message }}'
           git push --tags
 
+      - name: 'Get environment variables'
+        run: env
+
       - name: Logging
         env:
           GITHUB_EVENT_CONTEXT: ${{ toJSON(github.event) }}
