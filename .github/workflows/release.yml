@@ -45,3 +45,6 @@ jobs:
           echo ${{ steps.semantic-version.outputs.version_tag }}
           echo ${{ steps.semantic-version.outputs.changed }}
 
+      - name: 'Push git tags'
+        run: git push --tags
+
