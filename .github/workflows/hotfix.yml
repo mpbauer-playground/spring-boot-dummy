@@ -1,0 +1,19 @@
+name: hotfix
+
+on:
+  push:
+    branches: [ 'hotfix/**' ]
+  workflow_dispatch:
+
+jobs:
+  create-hotfix:
+    name: Creates a Hotfix
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: 'Get environment variables'
+        run: env
