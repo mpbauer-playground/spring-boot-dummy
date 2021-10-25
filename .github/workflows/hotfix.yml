@@ -49,12 +49,14 @@ jobs:
           if [[ -z "${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}" ]]
           then
             NEW_HOTFIX_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})-hotfix-1
+            echo "No hotfix tag for release '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}' exists, creating new hotfix tag '${NEW_HOTFIX_TAG}'"
           else
             NEW_HOTFIX_TAG=${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}+1
+            echo "Latest hotfix tag is '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}', incrementing revision number of hotfix tag to '${NEW_HOTFIX_TAG}'"
           fi
 
           # Print the new hotfix tag in the console
-          echo "New hotfix tag: ${NEW_HOTFIX_TAG}"
+          #echo "New hotfix tag: ${NEW_HOTFIX_TAG}"
 
           # Add git tag for hotfix release
           git tag -a ${NEW_HOTFIX_TAG} -m "Hotfix release for ${ORIGIN_BRANCH_TAG}"
