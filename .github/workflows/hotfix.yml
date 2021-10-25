@@ -15,6 +15,11 @@ jobs:
           ref: 'main'
           fetch-depth: 0
 
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email martin.ponbauer@hotmail.com
+
       - name: 'Get the current branch name'
         shell: bash
         run: echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
