@@ -1,3 +1,3 @@
 # Spring Boot Dummy
 
-Foo Bazsdasd  s Bar 1 2sasdasd asdasd
+This is a hotfix for v12.0.0
