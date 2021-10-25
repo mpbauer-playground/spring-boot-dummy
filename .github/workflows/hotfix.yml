@@ -50,21 +50,24 @@ jobs:
           # Print the latest hotfix tag in the console
           echo "Previous hotfix tag: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}"
 
+          # If the previous hotfix does not exist (empty) we create an initial hotfix tag beginning with revision number '1'
+          # In case a hotfix tag already exists the revision number will be incremented by one.
+          # The format of the hotfix is as follows: v{major}.{minor}.{patch}-hotfix-{revision}
           if [[ -z "${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}" ]]
           then
             NEW_HOTFIX_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})-hotfix-1
-            echo "No hotfix tag for '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}' exists, creating new tag '${NEW_HOTFIX_TAG}'"
+            echo "No hotfix tag for '${ORIGIN_BRANCH_TAG}' exists, creating new tag '${NEW_HOTFIX_TAG}'"
           else
             # How to increment last number in string: https://stackoverflow.com/questions/54367360/how-to-increment-the-last-number-in-a-string-bash
             NEW_HOTFIX_TAG=$(perl -pe 's/(\d+)(?!.*\d+)/$1+1/e' <<< ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG})
             echo "Incrementing hotfix version: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG} -> ${NEW_HOTFIX_TAG}"
           fi
 
-          # Print the new hotfix tag in the console
-          #echo "New hotfix tag: ${NEW_HOTFIX_TAG}"
-
           # Add git tag for hotfix release
           git tag -a ${NEW_HOTFIX_TAG} -m "Hotfix release for ${ORIGIN_BRANCH_TAG}"
+
+          # Print info message in console
+          echo "Pushing new hotfix tag '${NEW_HOTFIX_TAG}' to GitHub ..."
 
           # Push hotfix tag to git repository
           git push --tags
