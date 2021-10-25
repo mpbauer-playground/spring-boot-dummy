@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  openshift-ci-cd:
+  build:
     name: Build and deploy to OpenShift
     runs-on: ubuntu-20.04
     steps:
@@ -63,3 +63,26 @@ jobs:
           GITHUB_EVENT_CONTEXT: ${{ toJSON(github.event) }}
         run: echo "$GITHUB_EVENT_CONTEXT"
 
+  deploy-dev:
+    name: Deploy to DEV
+    runs-on: ubuntu-20.04
+    environment: dev
+    steps:
+      - name: 'Deploy to DEV'
+        run: echo "deploying application to DEV"
+
+  deploy-preprod:
+    name: Deploy to PREPROD
+    runs-on: ubuntu-20.04
+    environment: preprod
+    steps:
+      - name: 'Deploy to PREPROD'
+        run: echo "deploying application to PREPROD"
+
+  deploy-prod:
+    name: Deploy to PROD
+    runs-on: ubuntu-20.04
+    environment: prod
+    steps:
+      - name: 'Deploy to PROD'
+        run: echo "deploying application to PROD"
