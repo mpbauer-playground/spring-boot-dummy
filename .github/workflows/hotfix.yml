@@ -60,7 +60,6 @@ jobs:
           fi
 
           # Set hotfix version tag as step output
-          # Access hotfix version in the following steps via ${{ steps.determine-hotfix-version.outputs.hotfix-version }}
           echo "::set-output name=hotfix-version::${NEW_HOTFIX_TAG}
 
           # Add git tag for hotfix release
@@ -75,5 +74,3 @@ jobs:
       - name: 'Print hotfix version from previous step'
         run: |
           echo "The hotfix version is: ${{ steps.determine-hotfix-version.outputs.hotfix-version }}"
-
-
