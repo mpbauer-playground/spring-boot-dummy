@@ -65,24 +65,9 @@ jobs:
 
   deploy-dev:
     name: Deploy to DEV
+    needs: build
     runs-on: ubuntu-20.04
     environment: dev
     steps:
       - name: 'Deploy to DEV'
         run: echo "deploying application to DEV"
-
-  #deploy-preprod:
-  #  name: Deploy to PREPROD
-  #  runs-on: ubuntu-20.04
-  #  environment: preprod
-  #  steps:
-  #    - name: 'Deploy to PREPROD'
-  #      run: echo "deploying application to PREPROD"
-
-  #deploy-prod:
-  #  name: Deploy to PROD
-  #  runs-on: ubuntu-20.04
-  #  environment: prod
-  #  steps:
-  #    - name: 'Deploy to PROD'
-  #      run: echo "deploying application to PROD"
