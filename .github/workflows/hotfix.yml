@@ -67,11 +67,4 @@ jobs:
           # Push hotfix tag to git repository
           git push --tags
 
-      #- name: 'Get environment variables'
-      #  run: env
-
-      #- name: Logging
-      #  env:
-      #    GITHUB_EVENT_CONTEXT: ${{ toJSON(github.event) }}
-      #  run: echo "$GITHUB_EVENT_CONTEXT"
 
