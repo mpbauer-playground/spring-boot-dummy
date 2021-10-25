@@ -26,18 +26,22 @@ jobs:
 
       - name: 'Determine hotfix version'
         run: |
+          # Get the name of the current branch by truncating the value of the env variable GITHUB_REF
+          # Example value: GITHUB_REF=refs/heads/hotfix/major-issue
+          HOTFIX_BRANCH_NAME=${GITHUB_REF#refs/heads/}
+
           # Get the forking point of the main branch and returns the commit ID from where the hotfix branch was created (e.g. 'd8129bc330490c05fc58198f5c82eee04ffd0d56')
-          ORIGIN_BRANCH_COMMIT=$(git merge-base remotes/origin/main remotes/origin/${{ steps.current-branch-name.outputs.branch }})
+          ORIGIN_BRANCH_COMMIT=$(git merge-base remotes/origin/main remotes/origin/${HOTFIX_BRANCH_NAME})
 
           # Print the commit ID of the forking point in the console
-          echo "Hotfix branch '${{ steps.current-branch-name.outputs.branch }}' is based off of main branch with commit-id '${ORIGIN_BRANCH_COMMIT}'"
+          echo "Hotfix branch '${HOTFIX_BRANCH_NAME}' is based off of main branch with commit-id '${ORIGIN_BRANCH_COMMIT}'"
 
           # Get the git tag for the commit ID of the fork point which gives as the release tag (e.g. 'v1.0.0')
           # This only works for annotated git tags (git tag -a <tag> -m <message>)
           ORIGIN_BRANCH_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})
 
           # Print the annotated git tag for the commit ID of the forking point in the console
-          echo "Base branch uses git tag '${ORIGIN_BRANCH_TAG}'"
+          echo "Main branch with commit ID '${ORIGIN_BRANCH_COMMIT}' was tagged with '${ORIGIN_BRANCH_TAG}'"
 
           # Get the latest hotfix tag that starts with the git tag of the forking point commit ID.
           # If no hotfix tags exist the result will be empty
@@ -53,7 +57,7 @@ jobs:
           else
             # How to increment last number in string: https://stackoverflow.com/questions/54367360/how-to-increment-the-last-number-in-a-string-bash
             NEW_HOTFIX_TAG=$(perl -pe 's/(\d+)(?!.*\d+)/$1+1/e' <<< ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG})
-            echo "Incrementing hotfix version: '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}' -> '${NEW_HOTFIX_TAG}'"
+            echo "Incrementing hotfix version: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG} -> ${NEW_HOTFIX_TAG}"
           fi
 
           # Print the new hotfix tag in the console
