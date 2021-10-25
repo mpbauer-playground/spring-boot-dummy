@@ -49,10 +49,11 @@ jobs:
           if [[ -z "${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}" ]]
           then
             NEW_HOTFIX_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})-hotfix-1
-            echo "No hotfix tag for release '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}' exists, creating new hotfix tag '${NEW_HOTFIX_TAG}'"
+            echo "No hotfix tag for '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}' exists, creating new tag '${NEW_HOTFIX_TAG}'"
           else
-            NEW_HOTFIX_TAG=${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}+1
-            echo "Latest hotfix tag is '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}', incrementing revision number of hotfix tag to '${NEW_HOTFIX_TAG}'"
+            # How to increment last number in string: https://stackoverflow.com/questions/54367360/how-to-increment-the-last-number-in-a-string-bash
+            NEW_HOTFIX_TAG=$(perl -pe 's/(\d+)(?!.*\d+)/$1+1/e' <<< ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG})
+            echo "Incrementing hotfix version: '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}' -> '${NEW_HOTFIX_TAG}'"
           fi
 
           # Print the new hotfix tag in the console
