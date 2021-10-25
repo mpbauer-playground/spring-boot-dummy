@@ -60,7 +60,7 @@ jobs:
           fi
 
           # Set hotfix version tag as step output
-          echo "::set-output name=hotfix-version::${NEW_HOTFIX_TAG}
+          echo "::set-output name=hotfix-version::${NEW_HOTFIX_TAG}"
 
           # Add git tag for hotfix release
           git tag -a ${NEW_HOTFIX_TAG} -m "Hotfix release for ${HOTFIX_ORIGIN_BRANCH_TAG}"
