@@ -10,10 +10,34 @@ jobs:
     name: Creates a Hotfix
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
+          ref: 'main'
           fetch-depth: 0
+
+      - name: 'Get the current branch name'
+        shell: bash
+        run: echo "::set-output name=branch::${GITHUB_REF#refs/heads/}"
+        id: current-branch-name
+
+      - name: 'Determine hotfix version'
+        run: |
+          ORIGIN_BRANCH_COMMIT=$(git merge-base --fork-point main)
+          echo "Hotfix branch ${{ steps.current-branch-name.outputs.branch }} is based off of main branch with commit-id ${ORIGIN_BRANCH_COMMIT}"
+          ORIGIN_BRANCH_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})
+          echo "Base branch uses git tag ${ORIGIN_BRANCH_TAG}"
+          ORIGIN_BRANCH_LATEST_HOTFIX_TAG=$(git tag --list --sort=-version:refname "${ORIGIN_BRANCH_TAG}*-hotfix*" | head -n 1)
+          echo "Latest hotfix tag: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}"
 
       - name: 'Get environment variables'
         run: env
+
+      - name: Logging
+        env:
+          GITHUB_EVENT_CONTEXT: ${{ toJSON(github.event) }}
+        run: echo "$GITHUB_EVENT_CONTEXT"
+
+      - uses: actions/checkout@v2
+        with:
+          clean: false
+          fetch-depth: 0
