@@ -26,15 +26,40 @@ jobs:
 
       - name: 'Determine hotfix version'
         run: |
+          # Get the forking point of the main branch and returns the commit ID from where the hotfix branch was created (e.g. 'd8129bc330490c05fc58198f5c82eee04ffd0d56')
           ORIGIN_BRANCH_COMMIT=$(git merge-base remotes/origin/main remotes/origin/${{ steps.current-branch-name.outputs.branch }})
+
+          # Print the commit ID of the forking point in the console
           echo "Hotfix branch '${{ steps.current-branch-name.outputs.branch }}' is based off of main branch with commit-id '${ORIGIN_BRANCH_COMMIT}'"
+
+          # Get the git tag for the commit ID of the fork point which gives as the release tag (e.g. 'v1.0.0')
+          # This only works for annotated git tags (git tag -a <tag> -m <message>)
           ORIGIN_BRANCH_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})
+
+          # Print the annotated git tag for the commit ID of the forking point in the console
           echo "Base branch uses git tag '${ORIGIN_BRANCH_TAG}'"
+
+          # Get the latest hotfix tag that starts with the git tag of the forking point commit ID.
+          # If no hotfix tags exist the result will be empty
           ORIGIN_BRANCH_LATEST_HOTFIX_TAG=$(git tag --list --sort=-version:refname "${ORIGIN_BRANCH_TAG}*-hotfix*" | head -n 1)
+
+          # Print the latest hotfix tag in the console
           echo "Previous hotfix tag: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}"
-          [[ -z "${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}" ]] && NEW_HOTFIX_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})-hotfix-1 || NEW_HOTFIX_TAG=${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}+1
+
+          if [[ -z "${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}" ]]
+          then
+            NEW_HOTFIX_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})-hotfix-1
+          else
+            NEW_HOTFIX_TAG=${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}+1
+          fi
+
+          # Print the new hotfix tag in the console
           echo "New hotfix tag: ${NEW_HOTFIX_TAG}"
+
+          # Add git tag for hotfix release
           git tag -a ${NEW_HOTFIX_TAG} -m "Hotfix release for ${ORIGIN_BRANCH_TAG}"
+
+          # Push hotfix tag to git repository
           git push --tags
 
       - name: 'Get environment variables'
