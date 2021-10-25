@@ -20,6 +20,7 @@ jobs:
           git config user.email martin.ponbauer@hotmail.com
 
       - name: 'Determine hotfix version'
+        id: 'determine-hotfix-version'
         run: |
           # Get the name of the current branch by truncating the value of the env variable GITHUB_REF
           # Example value: GITHUB_REF=refs/heads/hotfix/major-issue
@@ -58,6 +59,10 @@ jobs:
             echo "Previous hotfix tag found. Incrementing revision number: ${HOTFIX_ORIGIN_BRANCH_LATEST_HOTFIX_TAG} -> ${NEW_HOTFIX_TAG}"
           fi
 
+          # Set hotfix version tag as step output
+          # Access hotfix version in the following steps via ${{ steps.determine-hotfix-version.outputs.hotfix-version }}
+          echo "::set-output name=hotfix-version::${NEW_HOTFIX_TAG}
+
           # Add git tag for hotfix release
           git tag -a ${NEW_HOTFIX_TAG} -m "Hotfix release for ${HOTFIX_ORIGIN_BRANCH_TAG}"
 
@@ -66,5 +71,9 @@ jobs:
 
           # Push hotfix tag to git repository
           git push --tags
+
+      - name: 'Print hotfix version from previous step'
+        run: |
+          echo "The hotfix version is: ${{ steps.determine-hotfix-version.outputs.hotfix-version }}"
 
 
