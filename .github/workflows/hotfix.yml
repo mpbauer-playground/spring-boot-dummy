@@ -27,14 +27,14 @@ jobs:
       - name: 'Determine hotfix version'
         run: |
           ORIGIN_BRANCH_COMMIT=$(git merge-base remotes/origin/main remotes/origin/${{ steps.current-branch-name.outputs.branch }})
-          echo "Hotfix branch ${{ steps.current-branch-name.outputs.branch }} is based off of main branch with commit-id ${ORIGIN_BRANCH_COMMIT}"
+          echo "Hotfix branch '${{ steps.current-branch-name.outputs.branch }}' is based off of main branch with commit-id '${ORIGIN_BRANCH_COMMIT}'"
           ORIGIN_BRANCH_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})
-          echo "Base branch uses git tag ${ORIGIN_BRANCH_TAG}"
+          echo "Base branch uses git tag '${ORIGIN_BRANCH_TAG}'"
           ORIGIN_BRANCH_LATEST_HOTFIX_TAG=$(git tag --list --sort=-version:refname "${ORIGIN_BRANCH_TAG}*-hotfix*" | head -n 1)
-          echo "Latest hotfix tag: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}"
+          echo "Previous hotfix tag: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}"
           [[ -z "${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}" ]] && NEW_HOTFIX_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})-hotfix-1 || NEW_HOTFIX_TAG=${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}+1
-          echo "New hotfix tag is ${NEW_HOTFIX_TAG}"
-          git tag -a ${NEW_HOTFIX_TAG} -m 'Hotfix release for ${ORIGIN_BRANCH_TAG}'
+          echo "New hotfix tag: ${NEW_HOTFIX_TAG}"
+          git tag -a ${NEW_HOTFIX_TAG} -m "Hotfix release for ${ORIGIN_BRANCH_TAG}"
           git push --tags
 
       - name: 'Get environment variables'
