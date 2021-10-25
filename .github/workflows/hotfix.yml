@@ -59,7 +59,8 @@ jobs:
             echo "Previous hotfix tag found. Incrementing revision number: ${HOTFIX_ORIGIN_BRANCH_LATEST_HOTFIX_TAG} -> ${NEW_HOTFIX_TAG}"
           fi
 
-          # Set hotfix version tag as step output
+          # Set hotfix version tag as step output for follow-up steps
+          # The hotfix version can be accessed via '${{ steps.determine-hotfix-version.outputs.hotfix-version }}'
           echo "::set-output name=hotfix-version::${NEW_HOTFIX_TAG}"
 
           # Add git tag for hotfix release
