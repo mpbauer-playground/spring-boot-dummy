@@ -12,8 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: 'main'
           fetch-depth: 0
+
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email martin.ponbauer@hotmail.com
 
       - name: 'Get the current branch name'
         shell: bash
@@ -22,12 +26,48 @@ jobs:
 
       - name: 'Determine hotfix version'
         run: |
-          ORIGIN_BRANCH_COMMIT=$(git merge-base remotes/origin/main remotes/origin/${{ steps.current-branch-name.outputs.branch }})
-          echo "Hotfix branch ${{ steps.current-branch-name.outputs.branch }} is based off of main branch with commit-id ${ORIGIN_BRANCH_COMMIT}"
+          # Get the name of the current branch by truncating the value of the env variable GITHUB_REF
+          # Example value: GITHUB_REF=refs/heads/hotfix/major-issue
+          HOTFIX_BRANCH_NAME=${GITHUB_REF#refs/heads/}
+
+          # Get the forking point of the main branch and returns the commit ID from where the hotfix branch was created (e.g. 'd8129bc330490c05fc58198f5c82eee04ffd0d56')
+          ORIGIN_BRANCH_COMMIT=$(git merge-base remotes/origin/main remotes/origin/${HOTFIX_BRANCH_NAME})
+
+          # Print the commit ID of the forking point in the console
+          echo "Hotfix branch '${HOTFIX_BRANCH_NAME}' is based off of main branch with commit-id '${ORIGIN_BRANCH_COMMIT}'"
+
+          # Get the git tag for the commit ID of the fork point which gives as the release tag (e.g. 'v1.0.0')
+          # This only works for annotated git tags (git tag -a <tag> -m <message>)
           ORIGIN_BRANCH_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})
-          echo "Base branch uses git tag ${ORIGIN_BRANCH_TAG}"
+
+          # Print the annotated git tag for the commit ID of the forking point in the console
+          echo "Main branch with commit ID '${ORIGIN_BRANCH_COMMIT}' was tagged with '${ORIGIN_BRANCH_TAG}'"
+
+          # Get the latest hotfix tag that starts with the git tag of the forking point commit ID.
+          # If no hotfix tags exist the result will be empty
           ORIGIN_BRANCH_LATEST_HOTFIX_TAG=$(git tag --list --sort=-version:refname "${ORIGIN_BRANCH_TAG}*-hotfix*" | head -n 1)
-          echo "Latest hotfix tag: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}"
+
+          # Print the latest hotfix tag in the console
+          echo "Previous hotfix tag: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}"
+
+          if [[ -z "${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}" ]]
+          then
+            NEW_HOTFIX_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})-hotfix-1
+            echo "No hotfix tag for '${ORIGIN_BRANCH_LATEST_HOTFIX_TAG}' exists, creating new tag '${NEW_HOTFIX_TAG}'"
+          else
+            # How to increment last number in string: https://stackoverflow.com/questions/54367360/how-to-increment-the-last-number-in-a-string-bash
+            NEW_HOTFIX_TAG=$(perl -pe 's/(\d+)(?!.*\d+)/$1+1/e' <<< ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG})
+            echo "Incrementing hotfix version: ${ORIGIN_BRANCH_LATEST_HOTFIX_TAG} -> ${NEW_HOTFIX_TAG}"
+          fi
+
+          # Print the new hotfix tag in the console
+          #echo "New hotfix tag: ${NEW_HOTFIX_TAG}"
+
+          # Add git tag for hotfix release
+          git tag -a ${NEW_HOTFIX_TAG} -m "Hotfix release for ${ORIGIN_BRANCH_TAG}"
+
+          # Push hotfix tag to git repository
+          git push --tags
 
       - name: 'Get environment variables'
         run: env
