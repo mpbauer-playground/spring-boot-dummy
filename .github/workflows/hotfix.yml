@@ -22,7 +22,7 @@ jobs:
 
       - name: 'Determine hotfix version'
         run: |
-          ORIGIN_BRANCH_COMMIT=$(git merge-base --fork-point main)
+          ORIGIN_BRANCH_COMMIT=$(git merge-base remotes/origin/main remotes/origin/${{ steps.current-branch-name.outputs.branch }})
           echo "Hotfix branch ${{ steps.current-branch-name.outputs.branch }} is based off of main branch with commit-id ${ORIGIN_BRANCH_COMMIT}"
           ORIGIN_BRANCH_TAG=$(git describe --exact-match ${ORIGIN_BRANCH_COMMIT})
           echo "Base branch uses git tag ${ORIGIN_BRANCH_TAG}"
